@@ -1,6 +1,7 @@
 import os, sys
 from itertools import product
-from ograph import Graph, minimiser, minimiser_rc, minbutbiggerthan
+from ograph import Graph
+from minimizer import minimizer, minimizer_rc, minbutbiggerthan
 
 class Bcalm:
     def __init__(self, input_filename, output_filename, k, m):
@@ -11,24 +12,25 @@ class Bcalm:
         self.nb_buckets = 4**m
         if self.nb_buckets > 1000:
             sys.exit("Error: m too large, will open too many files")
-        self.bucket_names = sorted(map(''.join, product('acgt', repeat=self.m)))
+        self.bucket_names = sorted(map(lambda s: minimizer(''.join(s), m), product('acgt', repeat=self.m)))
         if not os.path.exists(".bcalmtmp"):
             os.mkdir(".bcalmtmp")
         else:
-            os.system("rm .bcalmtmp/*")
+            os.system("rm -f .bcalmtmp/*")
         self.bucket_files = dict()
         for bucket in self.bucket_names:
-            self.bucket_files[bucket] = open(".bcalmtmp/" + bucket,'w')
+            self.bucket_files[bucket] = open(".bcalmtmp/" + str(bucket),'w')
 
     def buckets_stats(self):
         for bucket in self.bucket_names:
-            os.system('wc -l .bcalmtmp/' + bucket + "|grep -v ^0")
+            os.system('wc -l .bcalmtmp/' + str(bucket) + "|grep -v ^0")
 
     def createoutfile(self):
         self.partition_kmers()
         for bucket in self.bucket_names:
             G = Graph(self.k)
-            G.importg(".bcalmtmp/" + bucket)
+            self.flush()
+            G.importg(".bcalmtmp/" + str(bucket))
             G.debruijn()
             G.compress()
             for node in G.nodes.values():
@@ -37,12 +39,15 @@ class Bcalm:
     def put_in_bucket(self, node, bucket):
         file = self.bucket_files[bucket] if bucket is not None else self.output_file
         file.write("%s;\n" % node)
-        file.flush()
+
+    def flush(self):
+        for bucket in self.bucket_names:
+            self.bucket_files[bucket].flush()
 
     def partition_kmers(self):
         for line in self.input_file:
             kmer = line.strip()[:-1]
-            bucket = minimiser_rc(kmer, self.m)
+            bucket = minimizer_rc(kmer, self.m)
             self.put_in_bucket(kmer, bucket)
         self.buckets_stats()
         

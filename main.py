@@ -16,13 +16,21 @@ def naive(input, output):
     sys.exit()
 
 if len(sys.argv) > 0:
-    k = len(open(sys.argv[1]).readline().strip().strip(';'))
-    print "auto-detected k:", k
-    if '--naive' in sys.argv:
-        naive(sys.argv[1], "output.dot")
-    else:
-        B = Bcalm(sys.argv[1], "output.dot", k, minimiser_size)
-        B.createoutfile()
+    input = sys.argv[1]
 else:
-    print "command line: input.dot output.dot [--naive]"
-    sys.exit()
+    sys.exit("command line: input.dot output.dot [--naive]")
+
+if len(sys.argv) > 1:
+    output = sys.argv[2]
+else:
+    output = "output.dot"
+
+k = len(open(sys.argv[1]).readline().strip().strip(';'))
+print "auto-detected k:", k
+if '--naive' in sys.argv:
+    naive(input, output)
+else:
+    B = Bcalm(input, output, k, minimiser_size)
+    B.createoutfile()
+
+

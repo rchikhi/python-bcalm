@@ -1,31 +1,6 @@
 from collections import defaultdict
-
-def minimiser(seq, size, hash_mode = False):
-    minimiser = seq[:size]
-    if hash_mode:
-        value = hash(minimiser)
-        for i in xrange(1,len(seq)-size+1):
-            t = hash(seq[i:size+i])
-            if value > t:
-                value, minimiser = t, seq[i:size+i]
-    else:
-        for i in xrange(1,len(seq)-size+1):
-            if minimiser > seq[i:size+i]:
-                minimiser = seq[i:size+i]
-    return minimiser
-
-def minimiser_rc(seq, size):
-    return min(minimiser(seq,size), minimiser(rc(seq),size))
-
-def minbutbiggerthan(firstoverlap, lastoverlap, bucket, size):
-    l = [ minimiser(firstoverlap, size), minimiser(rc(firstoverlap), size), \
-          minimiser(lastoverlap, size), minimiser(rc(lastoverlap), size) ]
-    for min in sorted(l):
-        if min > bucket:
-            return min
-    return None
-
 import string
+
 revcomp_trans=string.maketrans('actg', 'tgac')
 def rc(s):
     return string.translate(s, revcomp_trans)[::-1]

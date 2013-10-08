@@ -1,7 +1,7 @@
 import os, sys
 from itertools import product
 from ograph import Graph
-from minimizer import minimizer, minimizer_rc, minbutbiggerthan
+from minimizers import minimizer, minbutbiggerthan
 
 class Bcalm:
     def __init__(self, input_filename, output_filename, k, m):
@@ -12,7 +12,7 @@ class Bcalm:
         self.nb_buckets = 4**m
         if self.nb_buckets > 1000:
             sys.exit("Error: m too large, will open too many files")
-        self.bucket_names = sorted(map(lambda s: minimizer(''.join(s), m), product('acgt', repeat=self.m)))
+        self.bucket_names = sorted(list(set(map(lambda s: minimizer(''.join(s), m), product('acgt', repeat=self.m)))))
         if not os.path.exists(".bcalmtmp"):
             os.mkdir(".bcalmtmp")
         else:
@@ -32,7 +32,7 @@ class Bcalm:
             self.flush()
             G.importg(".bcalmtmp/" + str(bucket))
             G.debruijn()
-            G.compress()
+            G.compress(bucket)
             for node in G.nodes.values():
                 self.goodplace(node, bucket)
     
@@ -47,7 +47,7 @@ class Bcalm:
     def partition_kmers(self):
         for line in self.input_file:
             kmer = line.strip()[:-1]
-            bucket = minimizer_rc(kmer, self.m)
+            bucket = minimizer(kmer, self.m)
             self.put_in_bucket(kmer, bucket)
         self.buckets_stats()
         

@@ -1,5 +1,6 @@
 from collections import defaultdict
 import string
+from minimizers import minimizer
 
 revcomp_trans=string.maketrans('actg', 'tgac')
 def rc(s):
@@ -83,7 +84,7 @@ class Graph:
                 self.neighbor[neighbor_idx] += [(i_to,label_from_neighbor)]
                 self.neighbor[i_to] += [(neighbor_idx, neighbor_label)]
 
-        # i1 is discarded
+        # i_from is discarded
         del self.nodes[i_from]
         del self.neighbor[i_from]
 
@@ -92,7 +93,16 @@ class Graph:
 
         return i_from
 
-    def compress(self):
+    def can_compact(self, node_idx, node_label, bucket, minimizer_size):
+        if bucket == "":
+            return True
+        if node_label == 'O':
+            overlap = self.nodes[node_idx][-(self.k-1):] 
+        else:
+            overlap = self.nodes[node_idx][:self.k-1] 
+        return minimizer(overlap, minimizer_size) <= bucket
+
+    def compress(self, bucket = "", minimiser_size = 0):
         nodes_to_examine = self.nodes.keys()[:]
         while len(nodes_to_examine) > 0:
             node_idx = nodes_to_examine[0]
@@ -100,6 +110,8 @@ class Graph:
             for neighbor_idx, node_label in self.neighbor[node_idx]:
                 neighbor_label = self.get_edge_label(neighbor_idx, node_idx)
                 label = node_label + neighbor_label
+                if not self.can_compact(node_idx, node_label, bucket, minimiser_size):
+                    continue
                 if self.degree(node_idx, node_label) == 1 and self.degree(neighbor_idx, neighbor_label) == 1:
                     deleted_node = self.compact(node_idx, neighbor_idx, label)
                     nodes_to_examine.remove(deleted_node)

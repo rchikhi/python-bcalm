@@ -1,11 +1,15 @@
-from ograph import rc
 import pyhash
+import string
 hasher = pyhash.murmur3_32()
+
+revcomp_trans=string.maketrans('actg', 'tgac')
+def rc(s):
+    return string.translate(s, revcomp_trans)[::-1]
 
 def hash_function(seq):
     return hasher(seq) % 1000
 
-def minimizer(seq, size, hash_mode = True):
+def minimizer_singlestrand(seq, size, hash_mode = True):
     if hash_mode:
         minimizer = hash_function(seq[:size])
         for i in xrange(1,len(seq)-size+1):
@@ -16,12 +20,11 @@ def minimizer(seq, size, hash_mode = True):
             minimizer = min(minimizer,seq[i:size+i])
     return minimizer
 
-def minimizer_rc(seq, size):
-    return min(minimizer(seq,size), minimizer(rc(seq),size))
+def minimizer(seq, size):
+    return min(minimizer_singlestrand(seq,size), minimizer_singlestrand(rc(seq),size))
 
 def minbutbiggerthan(firstoverlap, lastoverlap, bucket, size):
-    l = [ minimizer(firstoverlap, size), minimizer(rc(firstoverlap), size), \
-          minimizer(lastoverlap, size), minimizer(rc(lastoverlap), size) ]
+    l = [ minimizer(firstoverlap, size), minimizer(lastoverlap, size) ]
     for min in sorted(l):
         if min > bucket:
             return min

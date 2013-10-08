@@ -32,7 +32,7 @@ class Bcalm:
             self.flush()
             G.importg(".bcalmtmp/" + str(bucket))
             G.debruijn()
-            G.compress(bucket)
+            G.compress(bucket, self.m)
             for node in G.nodes.values():
                 self.goodplace(node, bucket)
     

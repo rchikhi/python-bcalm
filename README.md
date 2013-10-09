@@ -1,7 +1,7 @@
 python-bcalm
 ============
 
-Toy Python implementation of the BCALM algorithm
+Python implementation of the BCALM algorithm
 
 Python package required: pyhash
 

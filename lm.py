@@ -6,7 +6,7 @@ from minimizers import minimizer, minbutbiggerthan
 class Bcalm:
     def __init__(self, input_filename, output_filename, k, m):
         self.input_file = open(input_filename)
-        self.output_file = open(output_filename,'w')
+        self.output_file = open(output_filename, 'w')
         self.k = k
         self.m = m
         self.nb_buckets = 4**m

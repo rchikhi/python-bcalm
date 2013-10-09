@@ -11,14 +11,14 @@ def hash_function(seq):
 
 def minimizer_singlestrand(seq, size, hash_mode = True):
     if hash_mode:
-        minimizer = hash_function(seq[:size])
+        res= hash_function(seq[:size])
         for i in xrange(1,len(seq)-size+1):
-            minimizer = min(minimizer, hash_function(seq[i:size+i]))
+            res = min(res, hash_function(seq[i:size+i]))
     else:
-        minimizer = seq[:size]
+        res = seq[:size]
         for i in xrange(1,len(seq)-size+1):
-            minimizer = min(minimizer,seq[i:size+i])
-    return minimizer
+            res = min(res, seq[i:size+i])
+    return res 
 
 def minimizer(seq, size):
     return min(minimizer_singlestrand(seq,size), minimizer_singlestrand(rc(seq),size))

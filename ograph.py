@@ -100,7 +100,7 @@ class Graph:
             overlap = self.nodes[node_idx][-(self.k-1):] 
         else:
             overlap = self.nodes[node_idx][:self.k-1] 
-        return minimizer(overlap, minimizer_size) <= bucket
+        return minimizer(overlap, minimizer_size) == bucket
 
     def compress(self, bucket = "", minimiser_size = 0):
         nodes_to_examine = self.nodes.keys()[:]
@@ -110,9 +110,9 @@ class Graph:
             for neighbor_idx, node_label in self.neighbor[node_idx]:
                 neighbor_label = self.get_edge_label(neighbor_idx, node_idx)
                 label = node_label + neighbor_label
-                if not self.can_compact(node_idx, node_label, bucket, minimiser_size):
-                    continue
                 if self.degree(node_idx, node_label) == 1 and self.degree(neighbor_idx, neighbor_label) == 1:
+                    if not self.can_compact(node_idx, node_label, bucket, minimiser_size):
+                        continue
                     deleted_node = self.compact(node_idx, neighbor_idx, label)
                     nodes_to_examine.remove(deleted_node)
                     compacted = True

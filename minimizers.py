@@ -1,24 +1,27 @@
-import pyhash
 import string
-hasher = pyhash.murmur3_32()
+
+hash_mode = True
+if hash_mode:
+    import pyhash
+    hasher = pyhash.murmur3_32()
 
 revcomp_trans=string.maketrans('actg', 'tgac')
 def rc(s):
     return string.translate(s, revcomp_trans)[::-1]
 
 def hash_function(seq):
-    return hasher(seq) % 1000
+    return hasher(seq) % 1000000
 
-def minimizer_singlestrand(seq, size, hash_mode = True):
+def minimizer_singlestrand(seq, size):
     if hash_mode:
-        res= hash_function(seq[:size])
+        minimizer = hash_function(seq[:size])
         for i in xrange(1,len(seq)-size+1):
-            res = min(res, hash_function(seq[i:size+i]))
+            minimizer = min(minimizer, hash_function(seq[i:size+i]))
     else:
-        res = seq[:size]
+        minimizer = seq[:size]
         for i in xrange(1,len(seq)-size+1):
-            res = min(res, seq[i:size+i])
-    return res 
+            minimizer = min(minimizer, seq[i:size+i])
+    return minimizer
 
 def minimizer(seq, size):
     return min(minimizer_singlestrand(seq,size), minimizer_singlestrand(rc(seq),size))

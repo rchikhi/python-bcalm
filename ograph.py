@@ -103,9 +103,10 @@ class Graph:
         return minimizer(overlap, minimizer_size) == bucket
 
     def compress(self, bucket = "", minimiser_size = 0):
-        nodes_to_examine = self.nodes.keys()[:]
+        nodes_to_examine = set(self.nodes.keys()[:])
         while len(nodes_to_examine) > 0:
-            node_idx = nodes_to_examine[0]
+            node_idx = nodes_to_examine.pop()
+            nodes_to_examine.add(node_idx)
             compacted = False
             for neighbor_idx, node_label in self.neighbor[node_idx]:
                 neighbor_label = self.get_edge_label(neighbor_idx, node_idx)

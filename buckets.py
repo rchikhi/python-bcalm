@@ -1,7 +1,6 @@
 import os, sys
 from minimizers import minimizer
 from collections import defaultdict
-from collections import defaultdict
 
 class Buckets:
     def __init__(self, minimizers, overflow_filename = None, prefix = "b"):
@@ -52,8 +51,8 @@ class Superbuckets():
     
     def iterate(self):
         for superbucket_name in self.superbuckets_names:
-            if os.stat(".bcalmtmp/s" + str(superbucket_name))[6] == 0:
-                continue # check if superbucket is empty
+            #if os.stat(".bcalmtmp/s" + str(superbucket_name))[6] == 0:
+            #    continue # check if superbucket is empty
             self.superbuckets.flush()
             print "Processing superbucket",superbucket_name
             self.create_buckets(superbucket_name)

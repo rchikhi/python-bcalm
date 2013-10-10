@@ -1,6 +1,6 @@
 import string
 
-hash_mode = True
+hash_mode = False 
 if hash_mode:
     import pyhash
     hasher = pyhash.murmur3_32()

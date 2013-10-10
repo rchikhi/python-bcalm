@@ -26,9 +26,10 @@ class Graph:
         self.last_node_index += 1
 
     def importg(self, name):
-        for line in open(name):
-            vertex = line.strip()[:-1]
-            self.addvertex(vertex)
+        with open(name) as f:
+            for line in f:
+                vertex = line.strip()[:-1]
+                self.addvertex(vertex)
 
     def output(self, file):
         with open(file,'w') as f:
@@ -115,7 +116,10 @@ class Graph:
                     if not self.can_compact(node_idx, node_label, bucket, minimiser_size):
                         continue
                     deleted_node = self.compact(node_idx, neighbor_idx, label)
-                    nodes_to_examine.remove(deleted_node)
+                    if deleted_node in nodes_to_examine: # I've a situation where deleted_node was not in nodes_to_examine 
+                                                         # (two edges <--< and >--< between two nodes)
+                                                         # hopefully there is no bug but this is suspicious
+                        nodes_to_examine.remove(deleted_node)
                     compacted = True
                     break
             if not compacted:

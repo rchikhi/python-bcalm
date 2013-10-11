@@ -1,9 +1,8 @@
 import string
 from itertools import product
 
-NONE, PYHASH, PURE_PYTHON_HASH = 0, 1, 2
+NONE, PYHASH, PURE_PYTHON_HASH, CACHED = 0, 1, 2, 3
 hash_mode = PURE_PYTHON_HASH 
-#hash_mode = NONE
 
 if hash_mode == PYHASH:
     import pyhash
@@ -25,12 +24,13 @@ elif hash_mode == PURE_PYTHON_HASH:
     def hash_function(seq):
         return hash_integer(hash(seq)) % 1000000
 
+hash_dict = None
 def precompute_hashes(m):
+    global hash_dict, hash_mode
     if hash_mode == NONE:
         return
-    global hash_function
-    d = dict([ (''.join(x), hash_function(''.join(x))) for x in product('acgt', repeat=m)]) 
-    hash_function = lambda x : d[x]
+    hash_dict = dict([ (''.join(x), hash_function(''.join(x))) for x in product('acgt', repeat=m)]) 
+    hash_mode = CACHED
     print "Precomputed hashes"
 
 revcomp_trans=string.maketrans('actg', 'tgac')
@@ -38,10 +38,14 @@ def rc(s):
     return string.translate(s, revcomp_trans)[::-1]
 
 def minimizer_singlestrand(seq, size):
-    if hash_mode != NONE:
+    if hash_mode == PYHASH or hash_mode == PURE_PYTHON_HASH:
         minimizer = hash_function(seq[:size])
         for i in xrange(1,len(seq)-size+1):
             minimizer = min(minimizer, hash_function(seq[i:size+i]))
+    elif hash_mode == CACHED:
+        minimizer = hash_dict[seq[:size]]
+        for i in xrange(1,len(seq)-size+1):
+            minimizer = min(minimizer, hash_dict[seq[i:size+i]])
     else:
         minimizer = seq[:size]
         for i in xrange(1,len(seq)-size+1):

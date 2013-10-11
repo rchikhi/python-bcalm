@@ -1,6 +1,7 @@
 from collections import defaultdict
 import string, shutil
 from minimizers import minimizer
+from tags import tag, untag, use_tags
 
 revcomp_trans=string.maketrans('actg', 'tgac')
 def rc(s):
@@ -14,8 +15,7 @@ class Graph:
         self.map = defaultdict(list) # last k-1-mers
         self.maprev = defaultdict(list) # last k-1-mers, reverse complemented
         self.neighbor = defaultdict(list)
-    
-
+        
     def addvertex(self, vertex):
         key = vertex[:self.k-1]
         keyrc = rc(vertex)[:self.k-1]
@@ -30,6 +30,8 @@ class Graph:
             nb_nodes, nb_nt = 0, 0
             for line in f:
                 vertex = line.strip()[:-1]
+                if use_tags:
+                    vertex = tag(vertex, self.k)
                 self.addvertex(vertex)
                 nb_nodes, nb_nt = nb_nodes + 1, nb_nt + len(vertex)
             graph_stats.new_graph(nb_nt, nb_nodes, name)
@@ -37,6 +39,9 @@ class Graph:
     def output(self, file):
         with open(file,'w') as f:
             for n in self.nodes:
+                node = self.nodes[n]
+                if use_tags:
+                    node = untag(node)
                 f.write("%s;\n" % self.nodes[n])
 
     def add_edge(self, i1, i2, label):
@@ -59,8 +64,8 @@ class Graph:
             for other_idx in self.map[keyrc]:
                 if i < other_idx:
                     self.add_edge(i, other_idx, 'II') # <---> edge
-        self.map.clear()
-        self.maprev.clear()
+        del self.map
+        del self.maprev
 
     def degree(self, node_index, in_or_out):
         return len([l for i,l in self.neighbor[node_index] if l == in_or_out])
@@ -127,6 +132,7 @@ class Graph:
                     break
             if not compacted:
                 nodes_to_examine.remove(node_idx)
+
 
 class GraphStats:
     largest_nb_nt = 0

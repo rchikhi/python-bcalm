@@ -51,8 +51,8 @@ class Superbuckets():
     
     def iterate(self):
         for superbucket_name in self.superbuckets_names:
-            #if os.stat(".bcalmtmp/s" + str(superbucket_name))[6] == 0:
-            #    continue # check if superbucket is empty
+            if os.stat(".bcalmtmp/s" + str(superbucket_name))[6] == 0:
+                continue # check if superbucket is empty
             self.superbuckets.flush()
             print "Processing superbucket",superbucket_name
             self.create_buckets(superbucket_name)
@@ -87,5 +87,6 @@ class Superbuckets():
 
     def flush(self):
         self.superbuckets.flush()
-        self.current_buckets.flush()
+        if self.current_buckets is not None:
+            self.current_buckets.flush()
 

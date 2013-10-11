@@ -1,13 +1,10 @@
 from itertools import product
 from ograph import Graph
-from minimizers import minimizer, minbutbiggerthan
+from minimizers import minimizer, minbutbiggerthan, precompute_hashes
 from buckets import Buckets, Superbuckets
 
 def bcalm(input_filename, output_filename, k, m):
     input_file = open(input_filename)
-    if 4**m > 1000:
-        sys.exit("Error: m too large, will open too many files")
-
     simple_buckets = False 
     if simple_buckets:
         minimizers = sorted(list(set(map(lambda s: minimizer(''.join(s), m), product('acgt', repeat=m)))))
@@ -17,12 +14,15 @@ def bcalm(input_filename, output_filename, k, m):
         minimizers = sorted(list(set(map(lambda s: minimizer(''.join(s), m), product('acgt', repeat=m)))))
         buckets = Superbuckets(minimizers, output_filename)
 
+    precompute_hashes(m)
+
 
     # partition k-mers
     for line in input_file:
         kmer = line.strip()[:-1]
         bucket_minimizer = minimizer(kmer, m)
         buckets.put(kmer, bucket_minimizer)
+    buckets.flush() 
     buckets.stats() 
 
     # process each bucket in minimizer order

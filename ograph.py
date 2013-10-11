@@ -1,5 +1,5 @@
 from collections import defaultdict
-import string
+import string, shutil
 from minimizers import minimizer
 
 revcomp_trans=string.maketrans('actg', 'tgac')
@@ -27,9 +27,12 @@ class Graph:
 
     def importg(self, name):
         with open(name) as f:
+            nb_nodes, nb_nt = 0, 0
             for line in f:
                 vertex = line.strip()[:-1]
                 self.addvertex(vertex)
+                nb_nodes, nb_nt = nb_nodes + 1, nb_nt + len(vertex)
+            graph_stats.new_graph(nb_nt, nb_nodes, name)
 
     def output(self, file):
         with open(file,'w') as f:
@@ -124,3 +127,25 @@ class Graph:
                     break
             if not compacted:
                 nodes_to_examine.remove(node_idx)
+
+class GraphStats:
+    largest_nb_nt = 0
+    largest_nb_nodes = 0
+    largest_nb_nt_filename = "largest_graph_nt.dot"
+    largest_nb_nodes_filename = "largest_graph_nodes.dot"
+    def new_graph(self, nb_nt, nb_nodes, name):
+        if name in [self.largest_nb_nt_filename, self.largest_nb_nodes_filename]:
+            return
+        if nb_nt > self.largest_nb_nt:
+            self.largest_nb_nt = nb_nt
+            shutil.copyfile(name, self.largest_nb_nt_filename)
+            print "Largest graph so far (in nucleotides) in name",name,":",nb_nt,"nucleotides (%d nodes)" % nb_nodes
+        if nb_nodes > self.largest_nb_nodes:
+            self.largest_nb_nodes = nb_nodes
+            shutil.copyfile(name, self.largest_nb_nodes_filename)
+            print "Largest graph so far (in nodes) in name",name,":",nb_nodes,"nodes (%d nucleotides)" % nb_nt
+
+
+graph_stats = GraphStats()
+
+

@@ -2,6 +2,8 @@ import os, sys
 from minimizers import minimizer
 from collections import defaultdict
 
+verbose_buckets = False
+
 class Buckets:
     def __init__(self, minimizers, overflow_filename = None, prefix = "b"):
         if overflow_filename is not None:
@@ -54,7 +56,6 @@ class Superbuckets():
             if os.stat(".bcalmtmp/s" + str(superbucket_name))[6] == 0:
                 continue # check if superbucket is empty
             self.superbuckets.flush()
-            print "Processing superbucket",superbucket_name
             self.create_buckets(superbucket_name)
             for elt in self.current_buckets.iterate():
                 yield elt
@@ -72,6 +73,9 @@ class Superbuckets():
                 if bucket.isdigit(): # hack, bucket names with hash-minimizers are numbers
                     bucket = long(bucket)
                 self.current_buckets.put(vertex, bucket)
+        if verbose_buckets:
+            print "Created buckets for superbucket",superbucket_name
+            self.current_buckets.stats()
 
     def put(self, node, bucket):
         if (self.current_buckets is not None and \

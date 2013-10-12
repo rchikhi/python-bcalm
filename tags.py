@@ -5,28 +5,28 @@ use_tags = True
 #--------
 
 current_tag = 0
-file = None
 tag_template = "+tag%d+"
-tags_file = ".bcalmtmp/tags"
+tags_filename = ".bcalmtmp/tags"
+tags_file = None
 
 revcomp_trans=string.maketrans('actg', 'tgac')
 def rc(s):
     return string.translate(s, revcomp_trans)[::-1]
 
 def tag(s, k):
-    global current_tag, file
-    if file is None:
-        file = open(tags_file,"w")
+    global current_tag, tags_file
+    if tags_file is None:
+        tags_file = open(tags_filename,"w")
     if len(s) < 3*k:
         return s
     start, middle, end = s[:k], s[k:-k], s[-k:]
-    file.write("%d %s\n" % (current_tag, middle))
+    tags_file.write("%d %s\n" % (current_tag, middle))
     s2 = start + (tag_template % current_tag) + end
     current_tag += 1
     return s2
 
 def untag(s):
-    global file
+    global tags_file
     is_DNA = True
     res = ""
     for c in s.split('+'):
@@ -34,16 +34,20 @@ def untag(s):
             reverse_tag = (c[0] != 't')
             t = rc(c) if reverse_tag else c
             n = t[3:]
-            file = open(tags_file)
-            for line in file:
-                file_n, seq = line.split()
-                if n == file_n:
+            if tags_file is not None:
+                tags_file.close()
+            tags_file = open(tags_filename)
+            for line in tags_file:
+                tags_file_n, seq = line.split()
+                if n == tags_file_n:
                     res += rc(seq) if reverse_tag else seq
                     break
         else:
             res += c
         is_DNA = not is_DNA
-    file = None
+    if tags_file is not None:
+        tags_file.close()
+        tags_file = None
     return res
 
 def test():

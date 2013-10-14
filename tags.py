@@ -17,7 +17,7 @@ def tag(s, k):
     global current_tag, tags_file
     if tags_file is None:
         tags_file = open(tags_filename,"w")
-    if len(s) < 3*k:
+    if len(s) < 10*k:
         return s
     start, middle, end = s[:k], s[k:-k], s[-k:]
     tags_file.write("%d %s\n" % (current_tag, middle))
